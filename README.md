@@ -1,8 +1,27 @@
-# `Web API`
 
-**Data loading optimalizations**
+## Getting started
 
-### `1) Eager / Lazy / Explicit loading`
+### Prerequisites
+  Download and install - [.NET 8.0 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
+### How to run
+* Clone the repository
+```
+git clone https://github.com/janbaranec421/Web-API.git <your-folder-path>
+```
+* Navigate to
+```
+<your-folder-path>\Notino
+```
+* Run app
+```
+dotnet run
+```
+* Application should be hosted on URL `http://localhost:5000/swagger`
+
+
+# **Data loading optimalizations**
+
+## 1) Eager / Lazy / Explicit loading
 Choosing between these depends on specifics of models and usage of their related entities.
 
 In general, lazy-loading could be selected as best approach if:
@@ -21,7 +40,7 @@ Explicit loading stands somewhere between.
 Could work best for large data sets, and when we would need to eager-load only part of data right away (i.e. take only first 5 records)
 
 
-### `2) Caching`
+## 2) Caching
 No one-size-fits-all solution. Should be used to the specific needs of application.
 In general, Web APIs are often ideal candidate for caching, because they often contain repeteable data retrievals.
 
@@ -33,12 +52,12 @@ Next are also advisable to use:
 Response caching - functions as cache on client side, reducing number of requests done to server. Valid for ASP.NET Core 6 apps and older.  
 Output caching - newer, more powerful replacement for Response Cache. Allows caching on both Client and Server sides (and many more utilities). Available for apps written in ASP.NET Core 7.0 and higher.
 
-### `3) Asynchronous data fetching`
+## 3) Asynchronous data fetching
 Synchronous access to DB involves a lot of waiting, which hurts scalability of application.  
 Using Async/Await to reduce unnecessary waiting for resources from DB.
 
 
-### `4) Other optimalization options`
+## 4) Other optimalization options
  - **pagination** - returning data in smaller chunks
  - **connection pooling** - increase/tune DB connection pool corresponding to app load
  - **payload reduction** - return only required data. typically achieved by using DTO's
