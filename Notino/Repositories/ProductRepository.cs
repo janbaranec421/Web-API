@@ -55,7 +55,7 @@ namespace Notino.Repositories
         public async Task<bool> Save()
         {
             var saved = await _context.SaveChangesAsync();
-            return saved > 0 ? true : false;
+            return saved > 0;
         }
     }
 }
