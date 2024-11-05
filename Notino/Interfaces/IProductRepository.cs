@@ -5,7 +5,7 @@ namespace Notino.Interfaces
 {
     public interface IProductRepository
     {
-        public Task<ICollection<Product>> GetProducts();
+        public Task<PagedResponse<Product>> GetProducts(int pageIndex, int pageSize);
         public Task<Product> GetProduct(int id);
         public Task<Product> GetProductTrimToLower(ProductDto ProductDto);
         public Task<bool> CreateProduct(Product product);

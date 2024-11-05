@@ -15,9 +15,11 @@ namespace Notino.Repositories
             _context = context;
         }
 
-        public async Task<ICollection<Product>> GetProducts()
+        public async Task<PagedResponse<Product>> GetProducts(int pageIndex = 1, int pageSize = 5)
         {
-            return await _context.Products.OrderBy(x => x.Id).ToListAsync();
+            var totalRecords = await _context.Products.CountAsync();
+            var products = await _context.Products.Skip((pageIndex - 1) * pageSize).Take(pageSize).ToListAsync();
+            return new PagedResponse<Product>(products, pageIndex, pageSize, totalRecords);
         }
 
         public async Task<Product> GetProduct(int id)

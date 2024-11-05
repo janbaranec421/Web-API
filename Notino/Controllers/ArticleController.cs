@@ -23,9 +23,12 @@ namespace Notino.Controllers
         [HttpGet]
         [ProducesResponseType(200, Type = typeof(ICollection<Article>))]
         [ProducesResponseType(400)]
-        public async Task<IActionResult> GetArticles()
+        public async Task<IActionResult> GetArticles([FromQuery] int pageIndex = 1, [FromQuery] int pageSize = 5)
         {
-            var articles = _mapper.Map<ICollection<ArticleDto>>(await _articleRepository.GetArticles());
+            if (pageIndex <= 0 || pageSize <= 0)
+                return BadRequest($"{nameof(pageIndex)} and {nameof(pageSize)} size must be greater than 0.");
+
+            var articles = _mapper.Map<PagedResponseDto<ArticleDto>>(await _articleRepository.GetArticles(pageIndex, pageSize));
 
             if (!ModelState.IsValid)
             {

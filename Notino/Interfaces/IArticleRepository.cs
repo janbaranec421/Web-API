@@ -5,7 +5,7 @@ namespace Notino.Interfaces
 {
     public interface IArticleRepository
     {
-        public Task<ICollection<Article>> GetArticles();
+        public Task<PagedResponse<Article>> GetArticles(int pageIndex, int pageSize);
         public Task<Article> GetArticle(int id);
         public Task<Article> GetArticleTrimToLower(ArticleDto articleDto);
         public Task<ICollection<Product>> GetProductsByArticle(int articleId);

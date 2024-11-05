@@ -14,6 +14,8 @@ namespace Notino.Helpers
             // Dto --> Domain
             CreateMap<ArticleDto, Article>();
             CreateMap<ProductDto, Product>();
+
+            CreateMap(typeof(PagedResponse<>), typeof(PagedResponseDto<>));
         }
     }
 }

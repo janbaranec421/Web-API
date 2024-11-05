@@ -15,9 +15,11 @@ namespace Notino.Repositories
             _context = context;
         }
 
-        public async Task<ICollection<Article>> GetArticles()
+        public async Task<PagedResponse<Article>> GetArticles(int pageIndex = 1, int pageSize = 5)
         {
-            return await _context.Articles.Include(x => x.Products).OrderBy(x => x.Id).ToListAsync();
+            var totalRecords = await _context.Articles.CountAsync();
+            var articles = await _context.Articles.Skip((pageIndex - 1) * pageSize).Take(pageSize).ToListAsync();
+            return new PagedResponse<Article>(articles, pageIndex, pageSize, totalRecords);
         }
 
         public async Task<Article> GetArticleTrimToLower(ArticleDto articleDto)
