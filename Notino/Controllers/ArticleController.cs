@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Notino.Dtos;
 using Notino.Interfaces;
 using Notino.Models;
+using System.Diagnostics;
 
 namespace Notino.Controllers
 {
@@ -12,11 +13,19 @@ namespace Notino.Controllers
     {
         private readonly IArticleRepository _articleRepository;
         private readonly IMapper _mapper;
+        private readonly ICacheService _cacheService;
+        private readonly ILogger<ArticleController> _logger;
 
-        public ArticleController(IArticleRepository articleRepository, IMapper mapper)
+        public ArticleController(
+            IArticleRepository articleRepository,
+            IMapper mapper,
+            ICacheService cacheService,
+            ILogger<ArticleController> logger)
         {
             _articleRepository = articleRepository;
             _mapper = mapper;
+            _cacheService = cacheService;
+            _logger = logger;
         }
 
         // GET: api/Article
@@ -25,17 +34,34 @@ namespace Notino.Controllers
         [ProducesResponseType(400)]
         public async Task<IActionResult> GetArticles([FromQuery] int pageIndex = 1, [FromQuery] int pageSize = 5)
         {
+            var stopwatch = Stopwatch.StartNew();
+
             if (pageIndex <= 0 || pageSize <= 0)
                 return BadRequest($"{nameof(pageIndex)} and {nameof(pageSize)} size must be greater than 0.");
 
-            var articles = _mapper.Map<PagedResponseDto<ArticleDto>>(await _articleRepository.GetArticles(pageIndex, pageSize));
+            // Retrieve from cache/DB
+            PagedResponse<Article> articles;
+            var cacheKey = $"Articles_Page_{pageIndex}_Size_{pageSize}";
+            if (await _cacheService.ExistsAsync(cacheKey))
+            {
+                articles = await _cacheService.GetAsync<PagedResponse<Article>>(cacheKey);
+            }
+            else
+            {
+                articles = await _articleRepository.GetArticlesAsync(pageIndex, pageSize);
+                await _cacheService.SetAsync(cacheKey, articles, TimeSpan.FromMinutes(1), TimeSpan.FromSeconds(20));
+            }
+            var articleDtos = _mapper.Map<PagedResponseDto<ArticleDto>>(articles);
 
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            return Ok(articles);
+            stopwatch.Stop();
+            _logger.LogInformation($"Articles_Page: {pageIndex}, Size: {pageSize}, Total execution: {stopwatch.ElapsedMilliseconds}ms");
+
+            return Ok(articleDtos);
         }
 
         // GET: api/Article/id
@@ -45,17 +71,35 @@ namespace Notino.Controllers
         [ProducesResponseType(404)]
         public async Task<IActionResult> GetArticle(int articleId)
         {
-            var article = _mapper.Map<ArticleDto>(await _articleRepository.GetArticle(articleId));
+            var stopwatch = Stopwatch.StartNew();
 
+            // Retrieve from cache/DB
+            var cacheKey = $"Article_ {articleId}";
+            Article article;
+            if (await _cacheService.ExistsAsync(cacheKey))
+            {
+                article = await _cacheService.GetAsync<Article>(cacheKey);
+            }
+            else
+            {
+                article = await _articleRepository.GetArticleAsync(articleId);
+                await _cacheService.SetAsync(cacheKey, article, TimeSpan.FromMinutes(1), TimeSpan.FromSeconds(20));
+            }
+            var articleDto = _mapper.Map<ArticleDto>(article);
+            
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            if (article == null)
+            if (articleDto == null)
             {
                 return NotFound();
             }
-            return Ok(article);
+
+            stopwatch.Stop();
+            _logger.LogInformation($"Article: {articleId}, Total execution: {stopwatch.ElapsedMilliseconds}ms");
+
+            return Ok(articleDto);
         }
 
         // GET: api/Article/id/products
@@ -65,12 +109,12 @@ namespace Notino.Controllers
         [ProducesResponseType(404)]
         public async Task<IActionResult> GetProductsByArticle(int articleId)
         {
-            if (!await _articleRepository.ArticleExists(articleId))
+            if (!await _articleRepository.ArticleExistsAsync(articleId))
             {
                 return NotFound();
             }
 
-            var products = _mapper.Map<List<ProductDto>>(await _articleRepository.GetProductsByArticle(articleId));
+            var products = _mapper.Map<List<ProductDto>>(await _articleRepository.GetProductsByArticleAsync(articleId));
 
             if (!ModelState.IsValid)
             {
@@ -95,7 +139,7 @@ namespace Notino.Controllers
                 return BadRequest();
             }
 
-            var articleFromDb = await _articleRepository.GetArticleTrimToLower(articleCreateDto);
+            var articleFromDb = await _articleRepository.GetArticleTrimToLowerAsync(articleCreateDto);
 
             if (articleFromDb != null)
             {
@@ -109,7 +153,7 @@ namespace Notino.Controllers
 
             var articleCreate = _mapper.Map<Article>((articleCreateDto));
 
-            if (!await _articleRepository.CreateArticle(articleCreate))
+            if (!await _articleRepository.CreateArticleAsync(articleCreate))
             {
                 ModelState.AddModelError("", "Something went wrong while saving..");
                 return StatusCode(500, ModelState);
@@ -135,7 +179,7 @@ namespace Notino.Controllers
             {
                 return BadRequest(ModelState);
             }
-            if (!await _articleRepository.ArticleExists(articleId))
+            if (!await _articleRepository.ArticleExistsAsync(articleId))
             {
                 return NotFound();
             }
@@ -146,7 +190,7 @@ namespace Notino.Controllers
 
             var article = _mapper.Map<Article>(articleUpdateDto);
 
-            if (!await _articleRepository.UpdateArticle(article))
+            if (!await _articleRepository.UpdateArticleAsync(article))
             {
                 ModelState.AddModelError("", "Something went wrong while saving..");
                 return StatusCode(500, ModelState);
@@ -162,19 +206,19 @@ namespace Notino.Controllers
         [ProducesResponseType(404)]
         public async Task<IActionResult> DeleteArticle(int articleId)
         {
-            if (!await _articleRepository.ArticleExists(articleId))
+            if (!await _articleRepository.ArticleExistsAsync(articleId))
             {
                 return NotFound();
             }
 
-            var article = await _articleRepository.GetArticle(articleId);
+            var article = await _articleRepository.GetArticleAsync(articleId);
 
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            if (!await _articleRepository.DeleteArticle(article))
+            if (!await _articleRepository.DeleteArticleAsync(article))
             {
                 ModelState.AddModelError("", "Something went wrong while saving..");
                 return StatusCode(500, ModelState);

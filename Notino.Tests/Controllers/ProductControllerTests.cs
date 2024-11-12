@@ -64,9 +64,9 @@ namespace Notino.Tests.Controller
             var articleId = 1;
             var productCreateDto = A.Fake<ProductDto>();
             var product = A.Fake<Product>();
-            A.CallTo(() => _productRepository.GetProductTrimToLower(productCreateDto)).Returns(Task.FromResult<Product>(null));
+            A.CallTo(() => _productRepository.GetProductTrimToLowerAsync(productCreateDto)).Returns(Task.FromResult<Product>(null));
             A.CallTo(() => _mapper.Map<Product>(productCreateDto)).Returns(product);
-            A.CallTo(() => _productRepository.CreateProduct(product)).Returns(true);
+            A.CallTo(() => _productRepository.CreateProductAsync(product)).Returns(true);
             var controller = new ProductController(_productRepository, _articleRepository, _mapper);
 
             //Act
@@ -85,9 +85,9 @@ namespace Notino.Tests.Controller
             var productUpdateDto = A.Fake<ProductDto>();
             productUpdateDto.Id = 1;
             var product = A.Fake<Product>();
-            A.CallTo(() => _productRepository.ProductExists(productId)).Returns(true);
+            A.CallTo(() => _productRepository.ProductExistsAsync(productId)).Returns(true);
             A.CallTo(() => _mapper.Map<Product>(productUpdateDto)).Returns(product);
-            A.CallTo(() => _productRepository.UpdateProduct(product)).Returns(true);
+            A.CallTo(() => _productRepository.UpdateProductAsync(product)).Returns(true);
             var controller = new ProductController(_productRepository, _articleRepository, _mapper);
 
             //Act
@@ -104,9 +104,9 @@ namespace Notino.Tests.Controller
             //Arrange
             var productId = 1;
             var product = A.Fake<Product>();
-            A.CallTo(() => _productRepository.ProductExists(productId)).Returns(true);
-            A.CallTo(() => _productRepository.GetProduct(productId)).Returns(product);
-            A.CallTo(() => _productRepository.DeleteProduct(product)).Returns(true);
+            A.CallTo(() => _productRepository.ProductExistsAsync(productId)).Returns(true);
+            A.CallTo(() => _productRepository.GetProductAsync(productId)).Returns(product);
+            A.CallTo(() => _productRepository.DeleteProductAsync(product)).Returns(true);
             var controller = new ProductController(_productRepository, _articleRepository, _mapper);
 
             //Act

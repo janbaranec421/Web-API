@@ -5,14 +5,14 @@ namespace Notino.Interfaces
 {
     public interface IArticleRepository
     {
-        public Task<PagedResponse<Article>> GetArticles(int pageIndex, int pageSize);
-        public Task<Article> GetArticle(int id);
-        public Task<Article> GetArticleTrimToLower(ArticleDto articleDto);
-        public Task<ICollection<Product>> GetProductsByArticle(int articleId);
-        public Task<bool> CreateArticle(Article article);
-        public Task<bool> UpdateArticle(Article article);
-        public Task<bool> DeleteArticle(Article article);
-        public Task<bool> ArticleExists(int id);
-        public Task<bool> Save();
+        public Task<PagedResponse<Article>> GetArticlesAsync(int pageIndex, int pageSize);
+        public Task<Article> GetArticleAsync(int id);
+        public Task<Article> GetArticleTrimToLowerAsync(ArticleDto articleDto);
+        public Task<ICollection<Product>> GetProductsByArticleAsync(int articleId);
+        public Task<bool> CreateArticleAsync(Article article);
+        public Task<bool> UpdateArticleAsync(Article article);
+        public Task<bool> DeleteArticleAsync(Article article);
+        public Task<bool> ArticleExistsAsync(int id);
+        public Task<bool> SaveAsync();
     }
 }

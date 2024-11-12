@@ -2,7 +2,7 @@
 
 namespace Notino.Data
 {
-    public static class DataInitalizer
+    public static class DataInitializer
     {
         public static WebApplication Seed(this WebApplication app)
         {
