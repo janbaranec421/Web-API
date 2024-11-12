@@ -15,14 +15,14 @@ namespace Notino.Controllers
         private readonly IArticleRepository _articleRepository;
         private readonly IMapper _mapper;
         private readonly ICacheService _cacheService;
-        private readonly ILogger<ArticleController> _logger;
+        private readonly ILogger<ProductController> _logger;
 
         public ProductController(
             IProductRepository productRepository, 
             IArticleRepository articleRepository,
             IMapper mapper,
             ICacheService cacheService, 
-            ILogger<ArticleController> logger)
+            ILogger<ProductController> logger)
         {
             _productRepository = productRepository;
             _articleRepository = articleRepository;
